@@ -1,0 +1,4 @@
+import type { ReactNode } from "react";
+import { Card, CardContent, Stack, Typography } from "@mui/material";
+interface Props { label: string; value: string; icon: ReactNode; accent: string; helperText: string; }
+export function DashboardCard({ label, value, icon, accent, helperText }: Props) { return <Card variant="outlined" sx={{ height: "100%" }}><CardContent><Stack direction="row" justifyContent="space-between" alignItems="flex-start"><Typography color="text.secondary" variant="body2">{label}</Typography><Stack alignItems="center" justifyContent="center" sx={{ bgcolor: accent, borderRadius: 2, color: "primary.main", height: 38, width: 38 }}>{icon}</Stack></Stack><Typography variant="h4" sx={{ mb: 0.5, mt: 2 }}>{value}</Typography><Typography color="text.secondary" variant="caption">{helperText}</Typography></CardContent></Card>; }
