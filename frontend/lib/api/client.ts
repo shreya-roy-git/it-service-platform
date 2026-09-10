@@ -5,7 +5,10 @@ import type {
   ApiResponse,
   AuthResponseData,
   CreateTicketInput,
+  GetTicketsParams,
+  GetTicketsResponse,
   LoginInput,
+  PaginationMeta,
   Ticket,
   TicketFormOptions,
   TicketSummary,
@@ -114,9 +117,23 @@ export function logoutApi(): Promise<{ message: string }> {
   return request(() => apiClient.post<ApiResponse<{ message: string }>>("/auth/logout"));
 }
 
-export function getTickets(): Promise<Ticket[]> {
-  return request(() => apiClient.get<ApiResponse<Ticket[]>>("/tickets"));
+export async function getTickets(params?: GetTicketsParams): Promise<GetTicketsResponse> {
+  if (!apiBaseUrl) {
+    throw new ApiError("NEXT_PUBLIC_API_URL is not configured.");
+  }
+  try {
+    const { data } = await apiClient.get<ApiResponse<Ticket[]> & { pagination: PaginationMeta }>("/tickets", {
+      params,
+    });
+    return {
+      data: data.data,
+      pagination: data.pagination,
+    };
+  } catch (error) {
+    throw getApiError(error);
+  }
 }
+
 
 export function getTicket(id: string): Promise<Ticket> {
   return request(() => apiClient.get<ApiResponse<Ticket>>(`/tickets/${encodeURIComponent(id)}`));

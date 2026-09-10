@@ -86,3 +86,28 @@ export interface UpdateTicketInput {
   assigneeId?: string | null;
 }
 
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface GetTicketsParams {
+  search?: string;
+  status?: TicketStatus;
+  priority?: TicketPriority;
+  assigneeId?: string;
+  projectId?: string;
+  page?: number;
+  limit?: number;
+  sortBy?: "createdAt" | "updatedAt" | "priority" | "status" | "ticketNumber";
+  sortOrder?: "asc" | "desc";
+}
+
+export interface GetTicketsResponse {
+  data: Ticket[];
+  pagination: PaginationMeta;
+}
+
+

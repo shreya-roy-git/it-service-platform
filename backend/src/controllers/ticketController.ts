@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { TicketPriority, TicketStatus } from "@prisma/client";
 import type { Request, Response } from "express";
 import { prisma } from "../config/prisma.js";
@@ -9,6 +10,9 @@ const ticketInclude = {
   assignee: { select: { id: true, firstName: true, lastName: true } },
 } as const;
 
+const ALLOWED_SORT_FIELDS = ["createdAt", "updatedAt", "priority", "status", "ticketNumber"] as const;
+type SortField = (typeof ALLOWED_SORT_FIELDS)[number];
+
 function isEnumValue<T extends Record<string, string>>(enumObject: T, value: unknown): value is T[keyof T] {
   return typeof value === "string" && Object.values(enumObject).includes(value);
 }
@@ -17,10 +21,113 @@ function readOptionalString(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
 
-export async function listTickets(_request: Request, response: Response): Promise<void> {
-  const tickets = await prisma.ticket.findMany({ include: ticketInclude, orderBy: { updatedAt: "desc" } });
-  response.status(200).json({ success: true, data: tickets });
+export async function listTickets(request: Request, response: Response): Promise<void> {
+  const {
+    search,
+    status,
+    priority,
+    assigneeId,
+    projectId,
+    page: rawPage,
+    limit: rawLimit,
+    sortBy: rawSortBy,
+    sortOrder: rawSortOrder,
+  } = request.query;
+
+  const where: Prisma.TicketWhereInput = {};
+
+  if (status !== undefined) {
+    if (!isEnumValue(TicketStatus, status)) {
+      throw new AppError("Invalid status filter.", 400);
+    }
+    where.status = status;
+  }
+
+  if (priority !== undefined) {
+    if (!isEnumValue(TicketPriority, priority)) {
+      throw new AppError("Invalid priority filter.", 400);
+    }
+    where.priority = priority;
+  }
+
+  if (typeof assigneeId === "string" && assigneeId.trim()) {
+    where.assigneeId = assigneeId.trim();
+  }
+
+  if (typeof projectId === "string" && projectId.trim()) {
+    where.projectId = projectId.trim();
+  }
+
+  if (typeof search === "string" && search.trim()) {
+    const term = search.trim();
+    where.OR = [
+      { ticketNumber: { contains: term, mode: "insensitive" } },
+      { title: { contains: term, mode: "insensitive" } },
+      { description: { contains: term, mode: "insensitive" } },
+    ];
+  }
+
+  let page = 1;
+  if (rawPage !== undefined) {
+    const parsedPage = Number(rawPage);
+    if (!Number.isInteger(parsedPage) || parsedPage < 1) {
+      throw new AppError("page must be an integer greater than or equal to 1.", 400);
+    }
+    page = parsedPage;
+  }
+
+  let limit = 10;
+  if (rawLimit !== undefined) {
+    const parsedLimit = Number(rawLimit);
+    if (!Number.isInteger(parsedLimit) || parsedLimit < 1 || parsedLimit > 100) {
+      throw new AppError("limit must be an integer between 1 and 100.", 400);
+    }
+    limit = parsedLimit;
+  }
+
+  let sortBy: SortField = "createdAt";
+  if (rawSortBy !== undefined) {
+    if (typeof rawSortBy !== "string" || !ALLOWED_SORT_FIELDS.includes(rawSortBy as SortField)) {
+      throw new AppError(`sortBy must be one of: ${ALLOWED_SORT_FIELDS.join(", ")}.`, 400);
+    }
+    sortBy = rawSortBy as SortField;
+  }
+
+  let sortOrder: "asc" | "desc" = "desc";
+  if (rawSortOrder !== undefined) {
+    if (typeof rawSortOrder !== "string" || (rawSortOrder !== "asc" && rawSortOrder !== "desc")) {
+      throw new AppError("sortOrder must be 'asc' or 'desc'.", 400);
+    }
+    sortOrder = rawSortOrder;
+  }
+
+  const skip = (page - 1) * limit;
+
+  const [tickets, total] = await prisma.$transaction([
+    prisma.ticket.findMany({
+      where,
+      include: ticketInclude,
+      orderBy: { [sortBy]: sortOrder },
+      skip,
+      take: limit,
+    }),
+    prisma.ticket.count({ where }),
+  ]);
+
+  const totalPages = Math.ceil(total / limit);
+
+  response.status(200).json({
+    success: true,
+    data: tickets,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages,
+    },
+  });
 }
+
 
 export async function getTicketById(request: Request, response: Response): Promise<void> {
   const ticketId = request.params.id;
