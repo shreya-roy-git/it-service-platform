@@ -9,6 +9,7 @@ import type {
   Ticket,
   TicketFormOptions,
   TicketSummary,
+  UpdateTicketInput,
   User,
 } from "@/types/api";
 
@@ -132,3 +133,8 @@ export function getTicketFormOptions(): Promise<TicketFormOptions> {
 export function createTicket(input: CreateTicketInput): Promise<Ticket> {
   return request(() => apiClient.post<ApiResponse<Ticket>>("/tickets", input));
 }
+
+export function updateTicket(id: string, input: UpdateTicketInput): Promise<Ticket> {
+  return request(() => apiClient.patch<ApiResponse<Ticket>>(`/tickets/${encodeURIComponent(id)}`, input));
+}
+

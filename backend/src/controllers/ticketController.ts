@@ -112,3 +112,80 @@ export async function createTicket(request: Request, response: Response): Promis
   });
   response.status(201).json({ success: true, data: ticket });
 }
+
+export async function updateTicket(request: Request, response: Response): Promise<void> {
+  const ticketId = request.params.id;
+  if (!ticketId || Array.isArray(ticketId)) {
+    throw new AppError("Ticket not found.", 404);
+  }
+
+  const existingTicket = await prisma.ticket.findUnique({
+    where: { id: ticketId },
+    select: { id: true },
+  });
+
+  if (!existingTicket) {
+    throw new AppError("Ticket not found.", 404);
+  }
+
+  const { title, description, status, priority, assigneeId } = request.body ?? {};
+
+  const updateData: {
+    title?: string;
+    description?: string | null;
+    status?: TicketStatus;
+    priority?: TicketPriority;
+    assigneeId?: string | null;
+  } = {};
+
+  if (title !== undefined) {
+    const trimmedTitle = typeof title === "string" ? title.trim() : "";
+    if (!trimmedTitle) {
+      throw new AppError("title cannot be empty.", 400);
+    }
+    updateData.title = trimmedTitle;
+  }
+
+  if (description !== undefined) {
+    updateData.description = typeof description === "string" && description.trim() ? description.trim() : null;
+  }
+
+  if (status !== undefined) {
+    if (!isEnumValue(TicketStatus, status)) {
+      throw new AppError("status is invalid.", 400);
+    }
+    updateData.status = status;
+  }
+
+  if (priority !== undefined) {
+    if (!isEnumValue(TicketPriority, priority)) {
+      throw new AppError("priority is invalid.", 400);
+    }
+    updateData.priority = priority;
+  }
+
+  if (assigneeId !== undefined) {
+    const trimmedAssigneeId = typeof assigneeId === "string" && assigneeId.trim() ? assigneeId.trim() : null;
+    if (trimmedAssigneeId) {
+      const assigneeExists = await prisma.user.findUnique({
+        where: { id: trimmedAssigneeId },
+        select: { id: true },
+      });
+      if (!assigneeExists) {
+        throw new AppError("The selected assignee was not found.", 400);
+      }
+      updateData.assigneeId = trimmedAssigneeId;
+    } else {
+      updateData.assigneeId = null;
+    }
+  }
+
+  const updatedTicket = await prisma.ticket.update({
+    where: { id: ticketId },
+    data: updateData,
+    include: ticketInclude,
+  });
+
+  response.status(200).json({ success: true, data: updatedTicket });
+}
+

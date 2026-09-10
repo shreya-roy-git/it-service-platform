@@ -77,3 +77,12 @@ export interface CreateTicketInput {
   status: TicketStatus;
   priority: TicketPriority;
 }
+
+export interface UpdateTicketInput {
+  title?: string;
+  description?: string | null;
+  status?: TicketStatus;
+  priority?: TicketPriority;
+  assigneeId?: string | null;
+}
+

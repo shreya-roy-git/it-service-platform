@@ -19,7 +19,7 @@ app.use(cors({
 
     callback(new Error("Origin is not allowed by CORS."));
   },
-  methods: ["GET", "HEAD", "OPTIONS", "POST"],
+  methods: ["GET", "HEAD", "OPTIONS", "POST", "PATCH", "PUT", "DELETE"],
 }));
 app.use(express.json());
 
