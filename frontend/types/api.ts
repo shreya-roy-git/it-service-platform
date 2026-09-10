@@ -110,4 +110,27 @@ export interface GetTicketsResponse {
   pagination: PaginationMeta;
 }
 
+export interface ManagedUser {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
+export interface CreateUserInput {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  role: string;
+}
+
+export interface UpdateUserInput {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  role?: string;
+}

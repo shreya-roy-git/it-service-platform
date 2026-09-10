@@ -16,7 +16,11 @@ export function ProtectedRoute({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   const isLoginPage = pathname === "/login";
-  const isAdminRoute = pathname === "/settings" || pathname.startsWith("/settings/");
+  const isAdminRoute =
+    pathname === "/settings" ||
+    pathname.startsWith("/settings/") ||
+    pathname === "/users" ||
+    pathname.startsWith("/users/");
 
   useEffect(() => {
     if (isLoading) return;

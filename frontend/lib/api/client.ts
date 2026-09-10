@@ -5,14 +5,17 @@ import type {
   ApiResponse,
   AuthResponseData,
   CreateTicketInput,
+  CreateUserInput,
   GetTicketsParams,
   GetTicketsResponse,
   LoginInput,
+  ManagedUser,
   PaginationMeta,
   Ticket,
   TicketFormOptions,
   TicketSummary,
   UpdateTicketInput,
+  UpdateUserInput,
   User,
 } from "@/types/api";
 
@@ -153,5 +156,21 @@ export function createTicket(input: CreateTicketInput): Promise<Ticket> {
 
 export function updateTicket(id: string, input: UpdateTicketInput): Promise<Ticket> {
   return request(() => apiClient.patch<ApiResponse<Ticket>>(`/tickets/${encodeURIComponent(id)}`, input));
+}
+
+export function getUsers(): Promise<ManagedUser[]> {
+  return request(() => apiClient.get<ApiResponse<ManagedUser[]>>("/users"));
+}
+
+export function getUser(id: string): Promise<ManagedUser> {
+  return request(() => apiClient.get<ApiResponse<ManagedUser>>(`/users/${encodeURIComponent(id)}`));
+}
+
+export function createUser(input: CreateUserInput): Promise<ManagedUser> {
+  return request(() => apiClient.post<ApiResponse<ManagedUser>>("/users", input));
+}
+
+export function updateUser(id: string, input: UpdateUserInput): Promise<ManagedUser> {
+  return request(() => apiClient.patch<ApiResponse<ManagedUser>>(`/users/${encodeURIComponent(id)}`, input));
 }
 

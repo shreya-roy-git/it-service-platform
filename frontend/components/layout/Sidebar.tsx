@@ -3,7 +3,7 @@
 import type { ElementType } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AssessmentOutlined, DashboardOutlined, HelpOutlined, ReportProblemOutlined, SettingsOutlined } from "@mui/icons-material";
+import { AssessmentOutlined, DashboardOutlined, HelpOutlined, PeopleOutlined, ReportProblemOutlined, SettingsOutlined } from "@mui/icons-material";
 import { Box, Divider, List, ListItemButton, ListItemIcon, ListItemText, Stack, Typography } from "@mui/material";
 import { useRole } from "@/hooks/useRole";
 
@@ -18,6 +18,7 @@ const primaryItems: Item[] = [
   { label: "Dashboard", icon: DashboardOutlined, href: "/" },
   { label: "Tickets", icon: ReportProblemOutlined, href: "/tickets" },
   { label: "Reports", icon: AssessmentOutlined, href: "/reports" },
+  { label: "User Management", icon: PeopleOutlined, href: "/users", adminOnly: true },
 ];
 
 const secondaryItems: Item[] = [
@@ -45,6 +46,7 @@ function NavigationItem({ label, icon: Icon, href }: Item) {
 export function Sidebar() {
   const { isAdministrator } = useRole();
 
+  const visiblePrimaryItems = primaryItems.filter((item) => !item.adminOnly || isAdministrator);
   const visibleSecondaryItems = secondaryItems.filter((item) => !item.adminOnly || isAdministrator);
 
   return (
@@ -73,7 +75,7 @@ export function Sidebar() {
       </Typography>
 
       <List disablePadding sx={{ mt: 1 }}>
-        {primaryItems.map((item) => (
+        {visiblePrimaryItems.map((item) => (
           <NavigationItem key={item.label} {...item} />
         ))}
       </List>

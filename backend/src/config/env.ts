@@ -15,10 +15,11 @@ function parsePort(value: string | undefined): number {
   return port;
 }
 
-const corsOrigins = (process.env.CORS_ORIGIN ?? "")
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
+const port = parsePort(process.env.PORT);
+
+const corsOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim()).filter(Boolean)
+  : ["http://localhost:3000", `http://localhost:${port}`];
 
 function requireEnvironmentVariable(name: "DATABASE_URL" | "JWT_SECRET"): string {
   const value = process.env[name];
@@ -31,7 +32,7 @@ function requireEnvironmentVariable(name: "DATABASE_URL" | "JWT_SECRET"): string
 
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? "development",
-  port: parsePort(process.env.PORT),
+  port,
   corsOrigins,
   databaseUrl: requireEnvironmentVariable("DATABASE_URL"),
   jwtSecret: requireEnvironmentVariable("JWT_SECRET"),
