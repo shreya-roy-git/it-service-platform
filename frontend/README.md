@@ -124,6 +124,12 @@ npm run test:e2e:report
 
 ---
 
+## Continuous Integration (CI)
+
+This project runs GitHub Actions CI on every push or PR to `develop`. See [Root README](../README.md#continuous-integration-ci-pipeline) and [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) for workflow configuration details.
+
+---
+
 ## Project Structure
 
 ```
