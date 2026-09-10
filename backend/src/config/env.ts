@@ -20,7 +20,7 @@ const corsOrigins = (process.env.CORS_ORIGIN ?? "")
   .map((origin) => origin.trim())
   .filter(Boolean);
 
-function requireEnvironmentVariable(name: "DATABASE_URL"): string {
+function requireEnvironmentVariable(name: "DATABASE_URL" | "JWT_SECRET"): string {
   const value = process.env[name];
   if (!value) {
     throw new Error(`${name} must be configured.`);
@@ -34,4 +34,6 @@ export const env = {
   port: parsePort(process.env.PORT),
   corsOrigins,
   databaseUrl: requireEnvironmentVariable("DATABASE_URL"),
+  jwtSecret: requireEnvironmentVariable("JWT_SECRET"),
 } as const;
+

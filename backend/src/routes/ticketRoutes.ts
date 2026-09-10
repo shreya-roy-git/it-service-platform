@@ -1,7 +1,10 @@
 import { Router } from "express";
 import { createTicket, getTicketById, getTicketFormOptions, getTicketSummary, listTickets } from "../controllers/ticketController.js";
+import { authenticate } from "../middleware/authMiddleware.js";
 
 export const ticketRouter = Router();
+
+ticketRouter.use(authenticate);
 
 ticketRouter.get("/", listTickets);
 ticketRouter.get("/summary", getTicketSummary);

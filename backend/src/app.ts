@@ -3,6 +3,7 @@ import express from "express";
 import { env } from "./config/env.js";
 import { errorMiddleware } from "./middleware/errorMiddleware.js";
 import { notFoundMiddleware } from "./middleware/notFoundMiddleware.js";
+import { authRouter } from "./routes/authRoutes.js";
 import { healthRouter } from "./routes/healthRoutes.js";
 import { ticketRouter } from "./routes/ticketRoutes.js";
 
@@ -23,6 +24,7 @@ app.use(cors({
 app.use(express.json());
 
 app.use("/api", healthRouter);
+app.use("/api/auth", authRouter);
 app.use("/api/tickets", ticketRouter);
 
 app.use(notFoundMiddleware);

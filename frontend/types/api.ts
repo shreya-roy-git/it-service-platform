@@ -13,6 +13,33 @@ export interface ApiErrorResponse {
   message: string;
 }
 
+export interface Role {
+  id: string;
+  name: string;
+  description: string | null;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  roleId: string;
+  role: Role;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LoginInput {
+  email: string;
+  password: string;
+}
+
+export interface AuthResponseData {
+  token: string;
+  user: User;
+}
+
 export type TicketStatus = "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED";
 export type TicketPriority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 

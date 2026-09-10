@@ -1,8 +1,38 @@
 import axios from "axios";
-import type { ApiErrorResponse, ApiHealthResponse, ApiResponse, CreateTicketInput, Ticket, TicketFormOptions, TicketSummary } from "@/types/api";
+import type {
+  ApiErrorResponse,
+  ApiHealthResponse,
+  ApiResponse,
+  AuthResponseData,
+  CreateTicketInput,
+  LoginInput,
+  Ticket,
+  TicketFormOptions,
+  TicketSummary,
+  User,
+} from "@/types/api";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 const apiBaseUrl = apiUrl ? `${apiUrl.replace(/\/$/, "")}/api` : undefined;
+
+export const TOKEN_KEY = "it_service_platform_token";
+
+export function getStoredToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+export function setStoredToken(token: string): void {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(TOKEN_KEY, token);
+  }
+}
+
+export function clearStoredToken(): void {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem(TOKEN_KEY);
+  }
+}
 
 export const apiClient = axios.create({
   baseURL: apiBaseUrl,
@@ -10,9 +40,35 @@ export const apiClient = axios.create({
   timeout: 5_000,
 });
 
+apiClient.interceptors.request.use((config) => {
+  const token = getStoredToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+let onUnauthorizedHandler: (() => void) | null = null;
+
+export function setOnUnauthorizedHandler(handler: (() => void) | null): void {
+  onUnauthorizedHandler = handler;
+}
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      if (onUnauthorizedHandler) {
+        onUnauthorizedHandler();
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export async function getHealthStatus(): Promise<ApiHealthResponse> {
   if (!apiBaseUrl) {
-    throw new Error("NEXT_PUBLIC_API_BASE_URL is not configured.");
+    throw new Error("NEXT_PUBLIC_API_URL is not configured.");
   }
 
   const { data } = await apiClient.get<ApiHealthResponse>("/health");
@@ -43,6 +99,18 @@ async function request<T>(operation: () => Promise<{ data: ApiResponse<T> }>): P
   } catch (error) {
     throw getApiError(error);
   }
+}
+
+export function loginApi(input: LoginInput): Promise<AuthResponseData> {
+  return request(() => apiClient.post<ApiResponse<AuthResponseData>>("/auth/login", input));
+}
+
+export function getCurrentUserApi(): Promise<User> {
+  return request(() => apiClient.get<ApiResponse<User>>("/auth/me"));
+}
+
+export function logoutApi(): Promise<{ message: string }> {
+  return request(() => apiClient.post<ApiResponse<{ message: string }>>("/auth/logout"));
 }
 
 export function getTickets(): Promise<Ticket[]> {
