@@ -42,15 +42,6 @@ async function selectFilter(page: Page, ariaLabel: string, optionText: string) {
   await page.getByRole("option", { name: new RegExp(`^${optionText}$`, "i") }).click();
 }
 
-/**
- * Fill a MUI TextField (floating label) using the label text.
- * MUI links <label> to <input> via htmlFor/id, so getByLabel works with the full label.
- */
-async function fillField(page: Page, labelText: string | RegExp, value: string) {
-  // Try exact label first; MUI required fields have "Title *" etc.
-  const field = page.getByLabel(labelText);
-  await field.fill(value);
-}
 
 /**
  * Select a value from a MUI Select field in the CREATE TICKET FORM.
