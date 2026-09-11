@@ -1,79 +1,181 @@
-# IT Service Platform
+**# IT Service Platform**
 
 Fullstack IT Service Management Platform featuring:
-- **Backend**: Node.js, TypeScript, Express, Prisma, PostgreSQL
-- **Frontend**: Next.js 16 (App Router), React 19, Material-UI (MUI)
-- **Testing**: Vitest (backend unit tests), Playwright (frontend E2E tests)
-- **Containerization**: Multi-stage Docker builds & Docker Compose
 
----
+\- **\*\*Backend\*\***: Node.js, TypeScript, Express, Prisma, PostgreSQL
 
-## Quick Start with Docker Compose
+\- **\*\*Frontend\*\***: Next.js 16 (App Router), React 19, Material-UI (MUI)
+
+\- **\*\*Testing\*\***: Vitest (backend unit tests), Playwright (frontend E2E tests)
+
+\- **\*\*Containerization\*\***: Multi-stage Docker builds & Docker Compose
+
+**---**
+
+**## 🌐 Live Demo**
+
+The application is deployed and available online.
+
+\- **\*\*Frontend\*\***: `https://it-service-platform-frontend.onrender.com/`
+
+\- **\*\*Backend API\*\***: `https://it-service-platform-1.onrender.com`
+
+\- **\*\*API Health Check\*\***: `https://it-service-platform-1.onrender.com/api/health`
+
+> **Note:** The backend API root `/` is not a public application page. Use `/api/health` to verify that the API is running.
+
+**---**
+
+**## 🔐 Demo Credentials**
+
+Use the following credentials to explore the deployed application.
+
+### Administrator
+
+\- **Email:** `manager@example.test`
+
+\- **Password:** `Manager@123`
+
+### Service Desk Analyst
+
+\- **Email:** `analyst@example.test`
+
+\- **Password:** `Analyst@123`
+
+> **Note:** These credentials are for this portfolio/demo application only. Do not use them for real production data.
+
+**---**
+
+**## 🏗️ Production Deployment**
+
+The application is deployed using the following architecture:
+
+\`\`\`text
+GitHub Repository
+       │
+       ├── Frontend
+       │     └── Render
+       │
+       └── Backend
+             └── Render
+                   │
+                   ▼
+             Neon PostgreSQL
+\`\`\`
+
+\- **\*\*Frontend Hosting\*\***: Render
+
+\- **\*\*Backend Hosting\*\***: Render
+
+\- **\*\*Database\*\***: Neon PostgreSQL
+
+\- **\*\*Containerization\*\***: Docker
+
+\- **\*\*Database Migrations\*\***: Prisma Migrate
+
+\- **\*\*CI/CD\*\***: GitHub Actions + Render automatic deployments
+
+\- **\*\*Production Database Seeding\*\***: Prisma seed script executed during backend container startup
+
+**---**
+
+**## Quick Start with Docker Compose**
 
 To build and launch the complete stack (PostgreSQL, Backend API, Frontend Web App):
 
-```bash
+\`\`\`bash
+
 docker compose up --build -d
-```
 
-### Application URLs & Exposed Ports
+\`\`\`
 
-| Service | Container URL / Port | Host Access URL | Notes |
-| :--- | :--- | :--- | :--- |
-| **Frontend Web App** | `http://localhost:3000` | `http://localhost:3000` | Next.js App Router |
-| **Backend API** | `http://localhost:4000` | `http://localhost:4000` | Express / Prisma API |
-| **API Health Check** | `http://localhost:4000/api/health` | `http://localhost:4000/api/health` | Public health endpoint |
-| **PostgreSQL Database** | `postgres:5432` (internal) | `localhost:5433` | Host port mapped to `5433` |
+**### Application URLs & Exposed Ports**
 
-> **Note on Database Port:** The backend connects internally to `postgres:5432` within the Docker network. Host port `5433` is mapped for local management tools (`psql`, DBeaver) to prevent conflicts with any pre-existing local PostgreSQL service running on host port `5432`.
+\| Service | Container URL / Port | Host Access URL | Notes |
+\| :--- | :--- | :--- | :--- |
+\| **\*\*Frontend Web App\*\*** | \`[http://localhost:3000](http://localhost:3000)\` | \`[http://localhost:3000](http://localhost:3000)\` | Next.js App Router |
+\| **\*\*Backend API\*\*** | \`[http://localhost:4000](http://localhost:4000)\` | \`[http://localhost:4000](http://localhost:4000)\` | Express / Prisma API |
+\| **\*\*API Health Check\*\*** | \`[http://localhost:4000/api/health](http://localhost:4000/api/health)\` | \`[http://localhost:4000/api/health](http://localhost:4000/api/health)\` | Public health endpoint |
+\| **\*\*PostgreSQL Database\*\*** | \`postgres:5432\` (internal) | \`localhost:5433\` | Host port mapped to \`5433\` |
 
-### Managing Docker Containers
+\> **\*\*Note on Database Port:\*\*** The backend connects internally to \`postgres:5432\` within the Docker network. Host port \`5433\` is mapped for local management tools (\`psql\`, DBeaver) to prevent conflicts with any pre-existing local PostgreSQL service running on host port \`5432\`.
 
-- **View Status:** `docker compose ps`
-- **View Logs (All Services):** `docker compose logs -f`
-- **View Backend Logs:** `docker compose logs -f backend`
-- **View Frontend Logs:** `docker compose logs -f frontend`
-- **View PostgreSQL Logs:** `docker compose logs -f postgres`
-- **Stop Containers (Preserve Data Volume):** `docker compose down`
+**### Managing Docker Containers**
 
----
+\- **\*\*View Status:\*\*** \`docker compose ps\`
 
-## Local Development & Test Workflows
+\- **\*\*View Logs (All Services):\*\*** \`docker compose logs -f\`
+
+\- **\*\*View Backend Logs:\*\*** \`docker compose logs -f backend\`
+
+\- **\*\*View Frontend Logs:\*\*** \`docker compose logs -f frontend\`
+
+\- **\*\*View PostgreSQL Logs:\*\*** \`docker compose logs -f postgres\`
+
+\- **\*\*Stop Containers (Preserve Data Volume):\*\*** \`docker compose down\`
+
+**---**
+
+**## Local Development & Test Workflows**
 
 Backend unit tests and Frontend Playwright E2E tests use dedicated test runners:
 
-### 1. Backend Tests (Vitest)
-```bash
-# From backend directory
+**### 1. Backend Tests (Vitest)**
+
+\`\`\`bash
+
+\# From backend directory
+
 cd backend
+
 npm test          # Runs Vitest unit tests
+
 npm run lint      # Runs ESLint check
+
 npm run build     # Compiles TypeScript (tsc)
-```
 
-### 2. Frontend E2E Tests (Playwright)
-```bash
-# From frontend directory
+\`\`\`
+
+**### 2. Frontend E2E Tests (Playwright)**
+
+\`\`\`bash
+
+\# From frontend directory
+
 cd frontend
+
 npm run lint      # Runs ESLint check
+
 npm run build     # Compiles Next.js production build
+
 npx playwright test   # Runs Playwright E2E test suite (requires backend on :4000)
-```
 
-### 3. Root Workspace Commands
-```bash
-npm run test:backend   # Runs backend Vitest suite
-npm run test:frontend  # Runs frontend Playwright E2E suite
-npm run test:e2e       # Runs frontend Playwright E2E suite
+\`\`\`
+
+**### 3. Root Workspace Commands**
+
+\`\`\`bash
+
+npm run test\:backend   # Runs backend Vitest suite
+
+npm run test\:frontend  # Runs frontend Playwright E2E suite
+
+npm run test\:e2e       # Runs frontend Playwright E2E suite
+
 npm run lint           # Runs linting across both services
+
 npm run build          # Builds both backend and frontend
-```
 
----
+\`\`\`
 
-## Continuous Integration (CI) Pipeline
+**---**
 
-The automated GitHub Actions CI workflow in [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) executes:
-1. `backend` job: PostgreSQL service container + `npm test` + `npm run build`
-2. `frontend` job: `npm run lint` + `npm run build`
-3. `e2e` job: Runs Playwright integration suite (`auth.spec.ts`, `tickets.spec.ts`, `rbac.spec.ts`)
+**## Continuous Integration (CI) Pipeline**
+
+The automated GitHub Actions CI workflow in [\`.github/workflows/ci.yml\`]\(./.github/workflows/ci.yml) executes:
+
+1\. \`backend\` job: PostgreSQL service container + \`npm test\` + \`npm run build\`
+
+2\. \`frontend\` job: \`npm run lint\` + \`npm run build\`
+
+3\. \`e2e\` job: Runs Playwright integration suite (\`auth.spec.ts\`, \`tickets.spec.ts\`, \`rbac.spec.ts\`)
