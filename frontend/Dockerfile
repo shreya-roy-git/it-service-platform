@@ -27,7 +27,7 @@ ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 # Build Next.js standalone distribution
 RUN npm run build
 
-# Runner stage
+# Production runtime stage
 FROM node:20-alpine AS runner
 
 WORKDIR /app
@@ -36,10 +36,12 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Copy standalone output and static assets from builder
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+# Copy standalone output and static assets from builder with non-root ownership
+COPY --chown=node:node --from=builder /app/public ./public
+COPY --chown=node:node --from=builder /app/.next/standalone ./
+COPY --chown=node:node --from=builder /app/.next/static ./.next/static
+
+USER node
 
 EXPOSE 3000
 

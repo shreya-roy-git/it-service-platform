@@ -2,7 +2,7 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: it-service-platform-postgres
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_DB: it_service_platform
       POSTGRES_USER: postgres
@@ -23,7 +23,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: it-service-platform-backend
-    restart: always
+    restart: unless-stopped
     ports:
       - "4000:4000"
     environment:
@@ -35,7 +35,13 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: sh -c "npx prisma migrate deploy && node dist/scripts/seed.js && node dist/server.js"
+    command: sh -e -c "npx prisma migrate deploy && node dist/scripts/seed.js && node dist/server.js"
+    healthcheck:
+      test: ["CMD-SHELL", "node -e 'fetch(\"http://localhost:4000/api/health\").then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   frontend:
     build:
@@ -44,7 +50,7 @@ services:
       args:
         NEXT_PUBLIC_API_URL: http://localhost:4000
     container_name: it-service-platform-frontend
-    restart: always
+    restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
@@ -52,7 +58,14 @@ services:
       PORT: 3000
       NEXT_PUBLIC_API_URL: http://localhost:4000
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "node -e 'fetch(\"http://localhost:3000/\").then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 volumes:
   postgres_data:

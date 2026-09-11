@@ -37,11 +37,13 @@ RUN apk add --no-cache openssl
 ENV NODE_ENV=production
 ENV PORT=4000
 
-# Copy pruned dependencies, built app, and Prisma artifacts from builder
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/prisma ./prisma
+# Copy pruned dependencies, built app, and Prisma artifacts with non-root ownership
+COPY --chown=node:node --from=builder /app/package.json ./package.json
+COPY --chown=node:node --from=builder /app/node_modules ./node_modules
+COPY --chown=node:node --from=builder /app/dist ./dist
+COPY --chown=node:node --from=builder /app/prisma ./prisma
+
+USER node
 
 EXPOSE 4000
 
