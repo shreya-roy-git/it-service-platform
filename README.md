@@ -1,82 +1,79 @@
 # IT Service Platform
 
-Fullstack IT Service Management Platform with Express (Node.js/Prisma/PostgreSQL) backend, Next.js (App Router/MUI) frontend, Vitest backend tests, and Playwright E2E tests.
+Fullstack IT Service Management Platform featuring:
+- **Backend**: Node.js, TypeScript, Express, Prisma, PostgreSQL
+- **Frontend**: Next.js 16 (App Router), React 19, Material-UI (MUI)
+- **Testing**: Vitest (backend unit tests), Playwright (frontend E2E tests)
+- **Containerization**: Multi-stage Docker builds & Docker Compose
+
+---
+
+## Quick Start with Docker Compose
+
+To build and launch the complete stack (PostgreSQL, Backend API, Frontend Web App):
+
+```bash
+docker compose up --build -d
+```
+
+### Application URLs & Exposed Ports
+
+| Service | Container URL / Port | Host Access URL | Notes |
+| :--- | :--- | :--- | :--- |
+| **Frontend Web App** | `http://localhost:3000` | `http://localhost:3000` | Next.js App Router |
+| **Backend API** | `http://localhost:4000` | `http://localhost:4000` | Express / Prisma API |
+| **API Health Check** | `http://localhost:4000/api/health` | `http://localhost:4000/api/health` | Public health endpoint |
+| **PostgreSQL Database** | `postgres:5432` (internal) | `localhost:5433` | Host port mapped to `5433` |
+
+> **Note on Database Port:** The backend connects internally to `postgres:5432` within the Docker network. Host port `5433` is mapped for local management tools (`psql`, DBeaver) to prevent conflicts with any pre-existing local PostgreSQL service running on host port `5432`.
+
+### Managing Docker Containers
+
+- **View Status:** `docker compose ps`
+- **View Logs (All Services):** `docker compose logs -f`
+- **View Backend Logs:** `docker compose logs -f backend`
+- **View Frontend Logs:** `docker compose logs -f frontend`
+- **View PostgreSQL Logs:** `docker compose logs -f postgres`
+- **Stop Containers (Preserve Data Volume):** `docker compose down`
+
+---
+
+## Local Development & Test Workflows
+
+Backend unit tests and Frontend Playwright E2E tests use dedicated test runners:
+
+### 1. Backend Tests (Vitest)
+```bash
+# From backend directory
+cd backend
+npm test          # Runs Vitest unit tests
+npm run lint      # Runs ESLint check
+npm run build     # Compiles TypeScript (tsc)
+```
+
+### 2. Frontend E2E Tests (Playwright)
+```bash
+# From frontend directory
+cd frontend
+npm run lint      # Runs ESLint check
+npm run build     # Compiles Next.js production build
+npx playwright test   # Runs Playwright E2E test suite (requires backend on :4000)
+```
+
+### 3. Root Workspace Commands
+```bash
+npm run test:backend   # Runs backend Vitest suite
+npm run test:frontend  # Runs frontend Playwright E2E suite
+npm run test:e2e       # Runs frontend Playwright E2E suite
+npm run lint           # Runs linting across both services
+npm run build          # Builds both backend and frontend
+```
 
 ---
 
 ## Continuous Integration (CI) Pipeline
 
-This repository includes an automated GitHub Actions CI workflow configured in [`.github/workflows/ci.yml`](./.github/workflows/ci.yml).
-
-### Pipeline Overview
-
-The CI pipeline runs automatically on:
-- Every `push` to the `develop` branch
-- Every `pull_request` targeting the `develop` branch
-
-### Workflow Jobs
-
-```mermaid
-flowchart TD
-    A[Trigger: push/PR to develop] --> B[Job 1: backend]
-    A --> C[Job 2: frontend]
-    B --> D[Job 3: e2e]
-    C --> D
-```
-
-1. **`backend` Job**
-   - **Service Container**: PostgreSQL 16 (`postgres:16-alpine`)
-   - **Environment Setup**: Node.js 20 with `npm` caching
-   - **Steps**:
-     - `npm ci` — Install exact backend dependencies
-     - `npm run lint` — ESLint code quality & zero-warning policy
-     - `npm run prisma:generate` — Generate Prisma Client
-     - `npx prisma migrate deploy` — Apply database migrations to CI test database
-     - `npm test` — Run Vitest backend automated test suite
-     - `npm run build` — Compile TypeScript (`tsc`)
-
-2. **`frontend` Job**
-   - **Environment Setup**: Node.js 20 with `npm` caching
-   - **Steps**:
-     - `npm ci` — Install exact frontend dependencies
-     - `npm run lint` — ESLint code quality check
-     - `npm run build` — Next.js production build (`next build`)
-
-3. **`e2e` Job** (Depends on `backend` & `frontend`)
-   - **Service Container**: PostgreSQL 16
-   - **Steps**:
-     - Prepares test database with Prisma migrations and initial seed data (`npm run seed`)
-     - Starts backend API server on `http://localhost:4000` and waits for `/api/health`
-     - Installs Playwright Chromium browser binary
-     - Runs Playwright E2E test suite (`auth.spec.ts`, `tickets.spec.ts`, `rbac.spec.ts`)
-     - Uploads Playwright HTML report, screenshots, and trace artifacts on test failure
-
----
-
-## Local Verification Commands
-
-Run the following commands locally to mirror the CI pipeline checks:
-
-### Backend
-```bash
-cd backend
-npm ci
-npm run lint
-npm test
-npm run build
-```
-
-### Frontend
-```bash
-cd frontend
-npm ci
-npm run lint
-npm run build
-```
-
-### End-to-End (E2E)
-```bash
-# Requires backend running on localhost:4000
-cd frontend
-npx playwright test
-```
+The automated GitHub Actions CI workflow in [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) executes:
+1. `backend` job: PostgreSQL service container + `npm test` + `npm run build`
+2. `frontend` job: `npm run lint` + `npm run build`
+3. `e2e` job: Runs Playwright integration suite (`auth.spec.ts`, `tickets.spec.ts`, `rbac.spec.ts`)

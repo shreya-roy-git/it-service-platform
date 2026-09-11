@@ -1,0 +1,14 @@
+{
+  "name": "it-service-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Fullstack IT Service Platform",
+  "scripts": {
+    "test": "npm --prefix backend test",
+    "test:backend": "npm --prefix backend test",
+    "test:frontend": "npm --prefix frontend run test:e2e:run",
+    "test:e2e": "npm --prefix frontend run test:e2e:run",
+    "lint": "npm --prefix backend run lint && npm --prefix frontend run lint",
+    "build": "npm --prefix backend run build && npm --prefix frontend run build"
+  }
+}

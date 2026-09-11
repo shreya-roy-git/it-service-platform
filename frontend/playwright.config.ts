@@ -10,6 +10,8 @@ import { defineConfig, devices } from "@playwright/test";
  */
 export default defineConfig({
   testDir: "./e2e",
+  testMatch: "**/*.spec.ts",
+  testIgnore: ["**/backend/**", "**/*.test.ts"],
 
   /** Run tests sequentially within a file to avoid auth race conditions */
   fullyParallel: false,
